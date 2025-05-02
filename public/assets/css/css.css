@@ -153,4 +153,10 @@
   font-weight: bold;
 }
 
+/* Override CSS */
+th:nth-last-child(1) {
+  text-align: center !important;
+}
+
+
   

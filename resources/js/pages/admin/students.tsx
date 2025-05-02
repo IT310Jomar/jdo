@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Modal } from '@/components/ui/modal';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Table } from '@/components/ui/datatable';
+import axios from 'axios';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -19,17 +20,43 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Students() {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const columns = ['ID', 'Name', 'Email'];
-    const data = [
-        [1, "Alice", "alice@example.com"],
-        [2, "Bob", "bob@example.com"],
-        [3, "Charlie", "charlie@example.com"],
-        [4, "David", "david@example.com"],
-        [5, "Eve", "eve@example.com"],
-        [6, "Frank", "frank@example.com"],
-        [7, "Grace", "grace@example.com"],
-        [8, "Hannah", "hannah@example.com"],
-    ];
+    const [studentData, setStudentData] = useState<any[]>([]);
+    const columns = ['No.', 'First Name', 'Middle Name', 'Last Name', 'Action'];
+
+
+    const students = () => {
+        axios.get('/api/admin/fetch-students')
+            .then((response) => {
+                const stud = response.data.data
+                const formatted = stud.map((s: any, index: number) => [
+                    index + 1,
+                    s.stud_fname,
+                    s.stud_mname ?? '',
+                    s.stud_lname,
+                    <div className="flex gap-2 justify-center">
+                        <a
+                            href="#"
+                            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-2 focus:ring-blue-300 font-medium rounded text-xs px-3 py-1.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                        >
+                            View
+                        </a>
+                        <a
+                            href="#"
+                            className="text-white bg-yellow-500 hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-300 font-medium rounded text-xs px-3 py-1.5 dark:bg-yellow-600 dark:hover:bg-yellow-700 focus:outline-none dark:focus:ring-yellow-800"
+                        >
+                            Edit
+                        </a>
+                    </div>,
+                ]);
+
+                setStudentData(formatted);
+            }).catch((error) => {
+                console.error(error);
+            })
+    }
+    useEffect(() => {
+        students();
+    }, []);
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Students" />
@@ -42,11 +69,12 @@ export default function Students() {
                                 Add Student
                             </Button>
                         </div>
-                        <Card className="w-full box-border border border-blue-100 shadow-sm mt-4">
+                        {/* <Card className="w-full box-border border border-blue-100 shadow-sm mt-4">
                             <CardContent>
-                                <Table columns={columns} data={data} />
+                                <Table columns={columns} data={studentData} />
                             </CardContent>
-                        </Card>
+                        </Card> */}
+                        <Table columns={columns} data={studentData} />
 
                     </CardContent>
                 </Card>
