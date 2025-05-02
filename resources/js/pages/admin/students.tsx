@@ -69,11 +69,6 @@ export default function Students() {
                                 Add Student
                             </Button>
                         </div>
-                        {/* <Card className="w-full box-border border border-blue-100 shadow-sm mt-4">
-                            <CardContent>
-                                <Table columns={columns} data={studentData} />
-                            </CardContent>
-                        </Card> */}
                         <Table columns={columns} data={studentData} />
 
                     </CardContent>
