@@ -7,11 +7,16 @@ use Illuminate\Http\Request;
 
 class StudentController extends Controller
 {
-    public function getStudents(){
-        $students = Student::latest()->get();
-
-        return response()->json(["success" => true,"data" => $students],200);
+    public function getStudents()
+    {
+        $students = Student::latest()->paginate(500); 
+    
+        return response()->json([
+            "success" => true,
+            "data" => $students
+        ], 200);
     }
+    
 
 
 }

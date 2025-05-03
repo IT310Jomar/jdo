@@ -34,7 +34,7 @@ function Table({ columns, data }: Props) {
     dataTableRef.current = dt;
     setTimeout(() => {
       setReady(true);
-    }, 50);
+    }, 0);
 
     return () => {
       if (dataTableRef.current) {

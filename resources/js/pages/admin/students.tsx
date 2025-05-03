@@ -10,68 +10,69 @@ import { Input } from '@/components/ui/input';
 import { Table } from '@/components/ui/datatable';
 import axios from 'axios';
 import { Spinner } from '@/components/ui/spinner';
+import { api } from '@/utils/api';
+import { Plus } from 'lucide-react';
+import { StepForward } from 'lucide-react';
+import { SkipBack } from 'lucide-react';
+import { View } from 'lucide-react';
+import { SquarePen } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
-  {
-    title: 'Students',
-    href: '/admin/students',
-  },
+  { title: 'Students', href: '/admin/students' },
 ];
 
 interface Student {
+  id: number;
   stud_fname: string;
-  stud_mname?: string;
+  stud_mname: string | null;
   stud_lname: string;
 }
 
 export default function Students() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [studentData, setStudentData] = useState<(string | number | JSX.Element)[][]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
 
   const columns = ['No.', 'First Name', 'Middle Name', 'Last Name', 'Action'];
 
   const formatAndSet = (students: Student[]) => {
     const formatted = students.map((s, index) => [
-      index + 1,
+      index + 1 + (page - 1) * 500, 
       s.stud_fname,
       s.stud_mname ?? '',
       s.stud_lname,
-      <div className="flex gap-2 justify-center" key={index}>
-        <a
-          href="#"
-          className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-2 focus:ring-blue-300 font-medium rounded text-xs px-3 py-1.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-        >
-          View
-        </a>
-        <a
-          href="#"
-          className="text-white bg-yellow-500 hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-300 font-medium rounded text-xs px-3 py-1.5 dark:bg-yellow-600 dark:hover:bg-yellow-700 focus:outline-none dark:focus:ring-yellow-800"
-        >
-          Edit
-        </a>
+      <div className="flex gap-2 justify-center" key={s.id}>
+        <a href="#" className="text-white bg-blue-700 hover:bg-blue-800 text-xs px-3 py-1.5 rounded"><View size={16} /></a>
+        <a href="#" className="text-white bg-yellow-500 hover:bg-yellow-600 text-xs px-3 py-1.5 rounded"><SquarePen size={16}/></a>
       </div>
     ]);
     setStudentData(formatted);
   };
 
-  useEffect(() => {
-    const cached = localStorage.getItem('cached_students');
-    const parsedCache: Student[] | null = cached ? JSON.parse(cached) : null;
-
-    axios.get('/api/admin/fetch-students')
-      .then((response) => {
-        const fresh: Student[] = response.data.data;
-        if (!parsedCache || parsedCache.length !== fresh.length) {
-          formatAndSet(fresh);
-          localStorage.setItem('cached_students', JSON.stringify(fresh));
-        }else{
-            formatAndSet(parsedCache); 
-        }
-      })
-      .catch((error) => {
-        console.error('Error fetching fresh students', error);
+  const fetchStudents = async (currentPage = 1) => {
+    setLoading(true);
+    try {
+      const response = await api.get(`/api/admin/fetch-students?page=${currentPage}&perPage=50`, {
+        cache: { ttl: 1000 * 60 * 5 }
       });
-  }, []);
+      const resData = response.data.data;
+      const fetched = response.data.data.data;
+      setStudents(fetched);
+      formatAndSet(fetched);
+      setLastPage(resData.last_page);
+    } catch (error) {
+      console.error('Error fetching students:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStudents(page);
+  }, [page]);
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -80,13 +81,20 @@ export default function Students() {
         <div className="text-xl font-semibold">Students List</div>
         <Card className="w-full box-border border border-blue-100 shadow-sm">
           <CardContent>
-            <div className="flex justify-end">
-              <Button type="button" className="mt-1" onClick={() => setIsModalOpen(true)}>
-                Add Student
+            <div className="flex justify-between items-center mb-4">
+              <Button type="button" onClick={() => setIsModalOpen(true)}>
+              <Plus /> Add Student
               </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setPage(p => Math.max(p - 1, 1))} disabled={page === 1}>
+                <SkipBack />Previous
+                </Button>
+                <Button variant="outline" onClick={() => setPage(p => p + 1)}   disabled={page >= lastPage}>
+                   Next <StepForward />
+                </Button>
+              </div>
             </div>
-
-            {studentData.length > 0 ? <Table columns={columns} data={studentData} /> : <Spinner/>}
+            {loading ? <Spinner /> : <Table columns={columns} data={studentData} />}
           </CardContent>
         </Card>
       </div>
