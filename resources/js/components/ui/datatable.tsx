@@ -1,11 +1,12 @@
 
-import { useEffect, useRef, useState } from 'react';
+import { JSX, useEffect, useRef, useState } from 'react';
 import { DataTable } from 'simple-datatables';
 import 'simple-datatables/dist/style.css';
 
+
 interface Props {
   columns: string[];
-  data: (string | number)[][];
+  data: (string | number | JSX.Element)[][];
 }
 
 function Table({ columns, data }: Props) {
@@ -31,11 +32,9 @@ function Table({ columns, data }: Props) {
     });
 
     dataTableRef.current = dt;
-
     setTimeout(() => {
-
       setReady(true);
-    }, 100);
+    }, 50);
 
     return () => {
       if (dataTableRef.current) {
@@ -58,17 +57,33 @@ function Table({ columns, data }: Props) {
         <thead className="text-xs text-gray-700  bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
           <tr>
             {columns.map((col, idx) => (
-            <th
-            key={idx}
-            className="px-6 py-3 border bg-blue-200 dark:border-gray-600"
-          >
-            {col}
-          </th>
-          
+              <th
+                key={idx}
+                className="px-6 py-3 border bg-blue-200 dark:border-gray-600"
+              >
+                {col}
+              </th>
+
             ))}
           </tr>
         </thead>
         <tbody>
+          {Array.isArray(data) && data.every(row => Array.isArray(row)) && data.map((row, rowIdx) => (
+            <tr key={rowIdx} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+              {row.map((cell, colIdx) => (
+                <td
+                  key={colIdx}
+                  className={`px-6 py-4 border dark:border-gray-600 ${colIdx === 1 ? 'font-medium text-gray-900 whitespace-nowrap dark:text-white' : ''}`}
+                >
+
+                  {typeof cell === 'string' || typeof cell === 'number' ? cell : <>{cell}</>}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+
+        {/* <tbody>
           {data.map((row, rowIdx) => (
             <tr key={rowIdx} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
               {row.map((cell, colIdx) => (
@@ -77,14 +92,14 @@ function Table({ columns, data }: Props) {
                   className={`px-6 py-4 border dark:border-gray-600 ${colIdx === 1 ? 'font-medium text-gray-900 whitespace-nowrap dark:text-white' : ''
                     }`}
                 >
-                  {/* ✅ Render JSX or text */}
+                
                   {typeof cell === 'string' || typeof cell === 'number' ? cell : <>{cell}</>}
                 </td>
 
               ))}
             </tr>
           ))}
-        </tbody>
+        </tbody> */}
       </table>
     </div>
   );
