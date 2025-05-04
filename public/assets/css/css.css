@@ -152,8 +152,6 @@
 .datatable-pagination .datatable-pagination button {
   font-weight: bold;
 }
-thead tr th:last-child {
-  text-align: center !important;
-}
+
 
   

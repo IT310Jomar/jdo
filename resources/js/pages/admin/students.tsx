@@ -31,7 +31,6 @@ interface Student {
 export default function Students() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [studentData, setStudentData] = useState<(string | number | JSX.Element)[][]>([]);
-  const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
@@ -60,7 +59,6 @@ export default function Students() {
       });
       const resData = response.data.data;
       const fetched = response.data.data.data;
-      setStudents(fetched);
       formatAndSet(fetched);
       setLastPage(resData.last_page);
     } catch (error) {

@@ -2,6 +2,7 @@
 import { JSX, useEffect, useRef, useState } from 'react';
 import { DataTable } from 'simple-datatables';
 import 'simple-datatables/dist/style.css';
+import '/resources/css/custom.css'
 
 
 interface Props {
@@ -82,24 +83,6 @@ function Table({ columns, data }: Props) {
             </tr>
           ))}
         </tbody>
-
-        {/* <tbody>
-          {data.map((row, rowIdx) => (
-            <tr key={rowIdx} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-              {row.map((cell, colIdx) => (
-                <td
-                  key={colIdx}
-                  className={`px-6 py-4 border dark:border-gray-600 ${colIdx === 1 ? 'font-medium text-gray-900 whitespace-nowrap dark:text-white' : ''
-                    }`}
-                >
-                
-                  {typeof cell === 'string' || typeof cell === 'number' ? cell : <>{cell}</>}
-                </td>
-
-              ))}
-            </tr>
-          ))}
-        </tbody> */}
       </table>
     </div>
   );
