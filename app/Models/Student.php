@@ -14,5 +14,8 @@ class Student extends Model
         'stud_fname',
         'stud_mname',
         'stud_lname',
+        'stud_status',
+        'email'
+        
     ];
 }
