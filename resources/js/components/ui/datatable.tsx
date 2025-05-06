@@ -1,92 +1,112 @@
 
-import { JSX, useEffect, useRef, useState } from 'react';
-import { DataTable } from 'simple-datatables';
-import 'simple-datatables/dist/style.css';
-import '/resources/css/custom.css'
-
+import '/resources/css/custom.css';
+import DataTable from 'react-data-table-component';
+import { useState, JSX } from 'react';
+import { Input } from '@/components/ui/input';
 
 interface Props {
   columns: string[];
   data: (string | number | JSX.Element)[][];
 }
 
-function Table({ columns, data }: Props) {
-  const tableRef = useRef<HTMLTableElement>(null);
-  const dataTableRef = useRef<DataTable | null>(null);
-  const [ready, setReady] = useState(false);
+export function Table({ columns, data }: Props) {
+  const [filterText, setFilterText] = useState('');
 
-  useEffect(() => {
-    if (!tableRef.current || data.length === 0) return;
+  const customStyles = {
+    headRow: {
+      style: {
+        backgroundColor: '#bfdbfe', 
+        fontWeight: 'bold' as const,
+      },
+    },
+    headCells: {
+      style: {
+        textAlign: 'left' as const,
+      },
+    },
+    cells: {
+      style: {
+        textAlign: 'left' as const,
+      },
+    },
+  };
 
-    // Destroy old instance
-    if (dataTableRef.current) {
-      dataTableRef.current.destroy();
-      dataTableRef.current = null;
-    }
+  const centeredColumns = ['action'];
 
-    setReady(false);
-    const dt = new DataTable(tableRef.current, {
-      searchable: true,
-      sortable: true,
-      perPage: 10,
-      perPageSelect: [10, 20, 50, 100, 500, 1000],
-    });
+  const columnDefs = columns.map((col, colIdx) => {
+    const normalizedCol = col.trim().toLowerCase();
+    const isCentered = centeredColumns.includes(normalizedCol);
+    let width: string | undefined;
 
-    dataTableRef.current = dt;
-    setTimeout(() => {
-      setReady(true);
-    }, 0);
+  switch (normalizedCol) {
+    case 'no.':
+      width = '80px';
+      break;
+    case 'action':
+      width = '200px';
+      break;
+    case 'first name':
+      width = '200px';
+      break;
+    case 'middle name':
+      width = '200px';
+      break;
+    case 'last name':
+      width = '200px'; 
+      break;
+    default:
+      width = undefined;
+  }
 
-    return () => {
-      if (dataTableRef.current) {
-        dataTableRef.current.destroy();
-        dataTableRef.current = null;
-      }
+    return {
+      name: col,
+      selector: (row: any) => row[`col${colIdx}`],
+      sortable: normalizedCol !== 'action',
+      cell: (row: any) => row[`col${colIdx}`],
+      wrap: true,
+      center: isCentered ? true : undefined,  
+      width,
     };
-  }, [data]);
+  });
+  
+
+  const dataRows = data.map((row) => {
+    const rowObj: { [key: string]: string | number | JSX.Element } = {};
+    row.forEach((cell, colIdx) => {
+      rowObj[`col${colIdx}`] = cell;
+    });
+    return rowObj;
+  });
+
+  const filteredRows = dataRows.filter((row) =>
+    Object.values(row).some((value) =>
+      typeof value === 'string'
+        ? value.toLowerCase().includes(filterText.toLowerCase())
+        : false
+    )
+  );
 
   return (
-    <div className="overflow-x-auto">
-      <table
-        ref={tableRef}
-        style={{
-          opacity: ready ? 1 : 0,
-          transition: 'opacity 0.3s ease-in-out',
-        }}
-        className="min-w-full text-sm  text-gray-500 dark:text-gray-400"
-      >
-        <thead className="text-xs text-gray-700  bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-          <tr>
-            {columns.map((col, idx) => (
-              <th
-                key={idx}
-                className="px-6 py-3 border bg-blue-200 dark:border-gray-600"
-              >
-                {col}
-              </th>
-
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {Array.isArray(data) && data.every(row => Array.isArray(row)) && data.map((row, rowIdx) => (
-            <tr key={rowIdx} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-              {row.map((cell, colIdx) => (
-                <td
-                  key={colIdx}
-                  className={`px-6 py-4 border dark:border-gray-600 ${colIdx === 1 ? 'font-medium text-gray-900 whitespace-nowrap dark:text-white' : ''}`}
-                >
-
-                  {typeof cell === 'string' || typeof cell === 'number' ? cell : <>{cell}</>}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="w-full overflow-x-auto">
+      <div className="flex justify-end mb-3 p-2">
+        <Input
+          type="text"
+          placeholder="Search..."
+          value={filterText}
+          onChange={(e) => setFilterText(e.target.value)}
+          className="w-64"
+        />
+      </div>
+      <DataTable
+        columns={columnDefs}
+        data={filteredRows}
+        pagination
+        highlightOnHover
+        responsive
+        persistTableHead
+        customStyles={customStyles}
+      />
     </div>
   );
 }
-
-export { Table };
 

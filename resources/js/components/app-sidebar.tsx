@@ -2,10 +2,17 @@ import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type NavItem } from '@/types';
+import { User, type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid, Users } from 'lucide-react';
 import AppLogo from './app-logo';
+import { usePage } from '@inertiajs/react';
+
+type PageProps = {
+    auth: {
+      user: User;
+    };
+  };
 
 const mainNavItems: NavItem[] = [
     {
@@ -34,6 +41,10 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
+    const { props } = usePage<PageProps>();
+    const user = props.auth?.user;
+
+    // if (user?.roles !== 'admin') return null;   
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -49,8 +60,20 @@ export function AppSidebar() {
             </SidebarHeader>
             
 
-            <SidebarContent>
+            {/* <SidebarContent>
                 <NavMain items={mainNavItems} />
+            </SidebarContent> */}
+             <SidebarContent>
+              
+                <NavMain
+                    items={mainNavItems.filter((item) => {
+                        
+                        if (item.href === '/admin/students') {
+                            return user?.roles === 'admin'; 
+                        }
+                        return true; 
+                    })}
+                />
             </SidebarContent>
 
             <SidebarFooter>

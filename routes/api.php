@@ -9,6 +9,9 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-Route::group(['middleware'=>'api','prefix'=>'admin'],function(){
+Route::group([ 'middleware' => 'api','prefix'=>'admin'],function(){
   Route::get('/fetch-students',[StudentController::class,'getStudents']);
+  Route::post('/add-students',[StudentController::class,'addStudents']);
+  Route::post('/update-stundent',[StudentController::class,'updateStudent']);
 });
+
